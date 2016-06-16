@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="Page Description">
+    <meta name="author" content="Kyle">
+    <title>Boothmap</title>
+
+    <!-- Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+
+    <![endif]-->
+    <title>BoothMap</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+
+    <!--[if lte IE 6]>
+    <style type="text/css">
+        #map {
+            height:expression(document.body.clientHeight-35); /* 10+10+15=35 */
+            width:expression(document.body.clientWidth-20); /* 10+10=20 */
+        }
+    </style>
+
+    <![endif]-->
+    <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
+    <script src="https://cdn.klokantech.com/maptilerlayer/v1/index.js"></script>
+    <script type="text/javascript">
+        var map;
+        var mapBounds = new google.maps.LatLngBounds(
+                new google.maps.LatLng(51.441950, -0.263315),
+                new google.maps.LatLng(51.619120, 0.011547));
+        var mapMinZoom = 10;
+        var mapMaxZoom = 15;
+        var maptiler = new google.maps.ImageMapType({
+            getTileUrl: function(coord, zoom) {
+                var proj = map.getProjection();
+                var z2 = Math.pow(2, zoom);
+                var tileXSize = 256 / z2;
+                var tileYSize = 256 / z2;
+                var tileBounds = new google.maps.LatLngBounds(
+                        proj.fromPointToLatLng(new google.maps.Point(coord.x * tileXSize, (coord.y + 1) * tileYSize)),
+                        proj.fromPointToLatLng(new google.maps.Point((coord.x + 1) * tileXSize, coord.y * tileYSize))
+                );
+                var y = coord.y;
+                var x = coord.x >= 0 ? coord.x : z2 + coord.x
+                if (mapBounds.intersects(tileBounds) && (mapMinZoom <= zoom) && (zoom <= mapMaxZoom))
+                    return zoom + "/" + x + "/" + y + ".png";
+                else
+                    return "http://www.maptiler.org/img/none.png";
+            },
+            tileSize: new google.maps.Size(256, 256),
+            isPng: true,
+
+            opacity: 0.8
+        });
+
+
+
+
+        function init() {
+            var opts = {
+                tilt:0,
+                streetViewControl: false,
+                center: new google.maps.LatLng(51.530535, -0.125884),
+                zoom: 12
+            };
+            map = new google.maps.Map(document.getElementById("map"), opts);
+            map.setMapTypeId('roadmap');
+            var opacitycontrol = new klokantech.OpacityControl(map, maptiler);
+            map.overlayMapTypes.insertAt(0, maptiler);
+
+            var wcicon = 'blue_MarkerW.png'
+            var JHicon = 'purple_MarkerJ.png'
+            var Bicon = 'darkgreen_MarkerB.png'
+
+            var contentString = "<p><b>Mitre Square</b></p><p>Catherine Eddowes, Jack the Ripper's fourth victim, 30th September 1888.</p>"
+            var infowindow = new google.maps.InfoWindow({
+                content: contentString
+            });
+            var ripMitre = new google.maps.Marker({
+                position: {lat: 51.51383, lng: -0.07808},
+                map: map,
+                icon: wcicon,
+            });
+            ripMitre.addListener('click', function() {
+                infowindow.open(map, ripMitre);
+            });
+
+            var Berner_string = "<p><b>Berner Street (now Henriques Street)</b></p><p>Elizabeth Stride, Jack the Ripper's third victim, 30th September 1888.</p>"
+            var Berner_window = new google.maps.InfoWindow({
+                content: Berner_string
+            });
+            var ripBerner = new google.maps.Marker({
+                position: {lat: 51.51356, lng: -0.06540},
+                map: map,
+                icon: wcicon
+            });
+            ripBerner.addListener('click', function() {
+                Berner_window.open(map, ripBerner);
+            });
+
+            var Royal_string = "<p><b>The Royal London Hospital</b></p><p>Emma Smith, the first victim on the Whitechapel Murders file, died at the Hospital.</p>"
+            var Royal_window = new google.maps.InfoWindow({
+                content: Royal_string
+            });
+            var ripRoyalHospital = new google.maps.Marker({
+                position: {lat: 51.51874, lng: -0.05781},
+                map: map,
+                icon: wcicon
+            });
+            ripRoyalHospital.addListener('click', function() {
+                Royal_window.open(map, ripRoyalHospital);
+            });
+
+            var Bucks_string = "<p><b>Bucks Row (now Durward Street)</b></p><p>The body of Mary Nichols, the first victim of Jack the Ripper, was found in a gateway on Bucks Row on the 31st of August 1888.</p>"
+            var Bucks_window = new google.maps.InfoWindow({
+                content: Bucks_string
+            });
+            var ripBucks = new google.maps.Marker({
+                position: {lat: 51.51982, lng: -0.06047},
+                map: map,
+                icon: wcicon
+            });
+            ripBucks.addListener('click', function() {
+                Bucks_window.open(map, ripBucks);
+            });
+
+            var Brick_string = "<p><b>Brick Lane, Osbourne Street</b></p><p>Emma Smith was attacked on this corner, apparently by a local gang, in the early morning of the 3rd of April 1888.</p>"
+            var Brick_window = new google.maps.InfoWindow({
+                content: Brick_string
+            });
+            var ripBrick = new google.maps.Marker({
+                position: {lat: 51.51686, lng: -0.07204},
+                map: map,
+                icon: wcicon
+            });
+            ripBrick.addListener('click', function() {
+                Brick_window.open(map, ripBrick);
+            });
+
+            var Gunthorpe_string = "<p><b>George Yard (now Gunthorpe Street)</b></p><p>Martha Tabram, who is thought by some to be Jack the Ripper's first victim, was murdered on Gunthorpe Street, 7th August 1888. At its junction with Whitechapel High Street was the White Hart pub (which today still stands). Suspect George Chapman worked as a barber in the basement of the White Hart in 1890.</p>"
+            var Gunthorpe_window = new google.maps.InfoWindow({
+                content: Gunthorpe_string
+            });
+            var ripGunthorpe = new google.maps.Marker({
+                position: {lat: 51.51656, lng: -0.07144},
+                map: map,
+                icon: wcicon
+            });
+            ripGunthorpe.addListener('click', function() {
+                Gunthorpe_window.open(map, ripGunthorpe);
+            });
+
+            var Brune_string = "<p><b>Dorset Street (now private road)</b></p><p>Mary Kelly, Jack the Ripper's last victim, was murdered here in her room at Miller's Court on the 9th of November 1888.</p>"
+            var Brune_window = new google.maps.InfoWindow({
+                content: Brune_string
+            });
+            var ripBrune = new google.maps.Marker({
+                position: {lat: 51.51804, lng: -0.07481},
+                map: map,
+                icon: wcicon
+            });
+            ripBrune.addListener('click', function() {
+                Brune_window.open(map, ripBrune);
+            });
+
+            var Hanbury_string = "<p><b>Hanbury Street</b></p><p>The body of Annie Chapman, the second victim, was found in the back yard of 29 Hanbury Street on the 8th of September 1888.</p>"
+            var Hanbury_window = new google.maps.InfoWindow({
+                content: Hanbury_string
+            });
+            var ripHanbury = new google.maps.Marker({
+                position: {lat: 51.52003, lng: -0.06925},
+                map: map,
+                icon: wcicon
+            });
+            ripHanbury.addListener('click', function() {
+                Hanbury_window.open(map, ripHanbury);
+            });
+
+            var JHCouttsinf = "<p>I never saw a circle of such hateful faces; and there was the man in the middle, with a kind of black, sneering coolness—frightened too, I could see that—but carrying it off, sir, really like Satan. 'If you choose to make capital out of this accident,' said he, 'I am naturally helpless. No gentleman but wishes to avoid a scene,' says he. 'Name your figure.' Well, we screwed him up to a hundred pounds for the child's family; he would have clearly liked to stick out; but there was something about the lot of us that meant mischief, and at last he struck. The next thing was to get the money; and where do you think he carried us but to that place with the door?— whipped out a key, went in, and presently came back with the matter of ten pounds in gold and a cheque for the balance on Coutts's, drawn payable to bearer and signed with a name that I can't mention, though it's one of the points of my story, but it was a name at least very well known and often printed.</p><p>p.6</p>"
+            var JHCouttsinfwin = new google.maps.InfoWindow({
+                content: JHCouttsinf
+            });
+            var JHCoutts = new google.maps.Marker({
+                position: {lat: 51.51142, lng: -0.11839},
+                map: map,
+                icon: JHicon
+            });
+            JHCoutts.addListener('click', function() {
+                JHCouttsinfwin.open(map, JHCoutts);
+            });
+
+            var JHCavinf = "<p>With that he blew out his candle, put on a great-coat, and set forth in the direction of Cavendish Square, that citadel of medicine, where his friend, the great Dr. Lanyon, had his house and received his crowding patients. &quot;If any one knows, it will be Lanyon,&quot; he had thought.</p><p>p.12</p>"
+            var JHCavinfwin = new google.maps.InfoWindow({
+                content: JHCavinf
+            });
+            var JHCav = new google.maps.Marker({
+                position: {lat: 51.51644, lng: -0.14504},
+                map: map,
+                icon: JHicon
+            });
+            JHCav.addListener('click', function() {
+                JHCavinfwin.open(map, JHCav);
+            });
+
+            var BWalhamgreeninf = "<p>Exactly where I was I could not tell. I had a faint notion that, if I only kept on long enough, I should strike some part of Walham Green. How long I should have to keep on I could only guess. Not a creature seemed to be about of whom I could make inquiries. It was as if I was  in a land of desolation. I suppose it was between eleven o clock and midnight......The greater part of the route along which I was driven--I know no juster word--was one with which I had some sort of acquaintance. It led, at first, through what, I take it, was some part of Walham Green....</p><p>Ch. 6</p>"
+            var BWalhamgreeninfwin = new google.maps.InfoWindow({
+                content: BWalhamgreeninf
+            });
+
+            var BWalhamgreen = new google.maps.Marker({
+                position: {lat: 51.476868, lng: -0.18985},
+                map: map,
+                icon: Bicon
+            });
+            BWalhamgreen.addListener('click', function() {
+                BWalhamgreeninfwin.open(map, BWalhamgreen);
+            });
+
+            var JHSohoinf = "<p>The dismal quarter of Soho seen under these changing glimpses, with its muddy ways, and slatternly passengers, and its lamps, which had never been extinguished or had been kindled afresh to combat this mournful re-invasion of darkness, seemed, in the lawyer's eyes, like a district of some city in a nightmare. The thoughts of his mind, besides, were of the gloomiest dye; and when he glanced at the companion of his drive, he was conscious of some touch of that terror of the law and the law's officers, which may at times assail the most honest. As the cab drew up before the address indicated, the fog lifted a little and showed him a dingy street, a gin palace, a low French eating-house, a shop for the retail of penny numbers and twopenny salads, many ragged children huddled in the doorways, and many women of different nationalities passing out, key in hand, to have a morning glass; and the next moment the fog settled down again upon that part, as brown as umber, and cut him off from his blackguardly surroundings. This was the home of Henry Jekyll's favourite; of a man who was heir to a quarter of a million sterling.</p><p>p.32</p>"
+            var JHSohoinfwin = new google.maps.InfoWindow({
+                content: JHSohoinf,
+                position: {lat: 51.50987, lng: -0.13790}
+            });
+            var JHSohocoords = [
+                {lat: 51.51503, lng: -0.14183},
+                {lat: 51.51615, lng: -0.13067},
+                {lat: 51.51319, lng: -0.12938},
+                {lat: 51.51006, lng: -0.13470},
+                {lat: 51.50987, lng: -0.13786}
+            ];
+
+            var JHSoho = new google.maps.Polygon({
+                paths: JHSohocoords,
+                strokeColor: '#9900cc',
+                strokeOpacity: 0.8,
+                strokeWeight: 2,
+                fillColor: '#9900cc',
+                fillOpacity: 0.35
+            });
+            JHSoho.addListener('click', function() {
+                JHSohoinfwin.open(map, JHSoho);
+            });
+
+            var JHReginf = "<p>There comes an end to all things; the most capacious measure is filled at last; and this brief condescension to evil finally destroyed the balance of my soul. And yet I was not alarmed; the fall seemed natural, like a return to the old days before I had made discovery. It was a fine, clear, January day, wet under foot where the frost had melted, but cloudless overhead; and the Regent's Park was full of winter chirrupings and sweet with spring odours. I sat in the sun on a bench; the animal within me licking the chops of memory; the spiritual side a little drowsed, promising subsequent penitence, but not yet moved to begin.</p><p>p.100-101</p>"
+            var JHReginfwin = new google.maps.InfoWindow({
+                content: JHReginf,
+                position: {lat: 51.53008, lng: -0.16740}
+            });
+            var JHRegcoords = [
+                {lat: 51.53008, lng: -0.16740},
+                {lat: 51.53574, lng: -0.16045},
+                {lat: 51.53536, lng: -0.14843},
+                {lat: 51.52543, lng: -0.14594},
+                {lat: 51.52329, lng: -0.15744}
+            ];
+
+            var JHReg = new google.maps.Polygon({
+                paths: JHRegcoords,
+                strokeColor: '#9900cc',
+                strokeOpacity: 0.8,
+                strokeWeight: 2,
+                fillColor: '#9900cc',
+                fillOpacity: 0.35
+            });
+            JHReg.addListener('click', function() {
+                JHReginfwin.open(map, JHReg);
+            });
+
+            var BMescoord = [
+                {lat: 51.47687, lng: -0.18985},
+                {lat: 51.48748, lng: -0.19565},
+                {lat: 51.49551, lng: -0.17425},
+                {lat: 51.49111,	lng: -0.17425},
+                {lat: 51.49738,	lng: -0.15906},
+                {lat: 51.50031,	lng: -0.15881}
+            ];
+            var BMes = new google.maps.Polyline({
+                path: BMescoord,
+                geodesic: true,
+                strokeColor: '#004600',
+                strokeOpacity: 1.0,
+                strokeWeight: 5
+            });
+
+            var polystring = "<p>I have since wondered whether in that respect my experience was not a normal one; whether it might not have happened to any. If so, there are streets in London, long lines of streets, which, at a certain period of the night, in a certain sort of weather--probably the weather had something to do with it--are clean deserted; in which there is neither foot-passenger nor vehicle,--not even a policeman. The greater part of the route along which I was driven--I know no juster word--was one with which I had some sort of acquaintance. It led, at first, through what, I take it, was some part of Walham Green; then along the Lillie Road, through Brompton, across the Fulham Road, through the network of streets leading to Sloane Street, across Sloane Street into Lowndes Square. Who goes that way goes some distance, and goes through some important thorough fares; yet not a creature did I see, nor, I imagine, was there a creature who saw me. As I crossed Sloane Street, I fancied that I heard the distant rumbling of a vehicle along the Knightsbridge Road, but that was the only sound I heard. It is painful even to recollect the plight in which I was when I was stopped,--for stopped I was, as shortly and as sharply, as the beast of burden, with a bridle in its mouth, whose driver puts a period to his career. I was wet,--intermittent gusts of rain were borne on the scurrying wind; in spite of the pace at which I had been brought, I was chilled to the bone; and--worst of all!--my mud-stained feet, all cut and bleeding, were so painful--for, unfortunately, I was still susceptible enough to pain--that it was agony to have them come into contact with the cold and the slime of the hard, unyielding pavement. I had been stopped on the opposite side of the square,--that nearest to the hospital . . . </p><p>Ch. 6</p>"
+            var polywindow = new google.maps.InfoWindow({
+                content: polystring,
+                position: {lat: 51.49551, lng: -0.17425}
+            });
+            BMes.addListener('click', function(){
+                polywindow.open(map, BMes);
+            });
+//    *******************************
+            var BHsmithinf = "<p>A more miserable night for an out-of-door excursion I could hardly have chosen. The rain was like a mist, and was not only drenching me to the skin, but it was rendering it difficult to see more than a little distance in any direction. The neighbourhood was badly lighted. It was one in which I was a stranger, I had come to Hammersmith as a last resource. It had seemed to me that I had tried to find some occupation which would enable me to keep body and soul together in every other part of London, and that now only Hammersmith was left. And, at Hammersmith, even the workhouse would have none of me! Retreating from the inhospitable portal of the casual ward, I had taken the first turning to the left,--and, at the moment, had been glad to take it. In the darkness and the rain, the locality which I was entering appeared unfinished. I seemed to be leaving civilisation behind me. The path was unpaved; the road rough and uneven, as if it had never been properly made. Houses were few and far between. Those which I did encounter, seemed, in the imperfect light, amid the general desolation, to be cottages which were crumbling to decay. Exactly where I was I could not tell. I had a faint notion that, if I only kept on long enough, I should strike some part of Walham Green. How long I should have to keep on I could only guess. Not a creature seemed to be about of whom I could make inquiries. It was as if I was  in a land of desolation. I suppose it was between eleven o clock and midnight. I had not given up my quest for work till all the shops were closed,--and in  Hammersmith, that night, at any rate, they were not early closers.</p><p>Ch. 1</p>"
+
+            var BHsmithinfwin = new google.maps.InfoWindow({
+                content: BHsmithinf,
+                position: {lat: 51.491188, lng: -0.223731}
+            });
+
+            var BHsmithcoords = [
+                {lat: 51.504800, lng: -0.196000},// top right corner
+                {lat: 51.491188, lng: -0.196000},//bottom right corner
+                {lat: 51.482188, lng: -0.196000}, // point?
+                {lat: 51.489188, lng: -0.243731}, //bottom left corner
+                {lat: 51.506188, lng: -0.248000}, //top left corner
+            ];
+
+            var BHsmith = new google.maps.Polygon({
+                paths: BHsmithcoords,
+                strokeColor: '#004600',
+                strokeOpacity: 0.8,
+                strokeWeight: 2,
+                fillColor: '#004600',
+                fillOpacity: 0.35
+            });
+            BHsmith.addListener('click', function() {
+                BHsmithinfwin.open(map, BHsmith);
+            });
+
+//    Dracula
+
+
+            var Dracicon = 'red_MarkerD.png'
+
+            var DracChickinf = "<p>197 Chicksand St, Mile End New Town (6 boxes from Carfax)</p><p>Ch. 20</p>"
+            var DracChickinfwin = new google.maps.InfoWindow({
+                content: DracChickinf
+            });
+            var DracChick = new google.maps.Marker({
+                position: {lat: 51.51861,	lng:-0.06912},
+                map: map,
+                icon: Dracicon
+            });
+            DracChick.addListener('click', function() {
+                DracChickinfwin.open(map, DracChick);
+            });
+
+            var DracAsyluminf = "<p>Dr. Seward's asylum, Dracula's Essex house</p><p>Ch. 5</p>"
+            var DracAsyluminfwin = new google.maps.InfoWindow({
+                content: DracAsyluminf
+            });
+            var DracAsylum = new google.maps.Marker({
+                position: {lat: 51.48671, lng: 0.24331},
+                map: map,
+                icon: Dracicon
+            });
+            DracAsylum.addListener('click', function() {
+                DracAsyluminfwin.open(map, DracAsylum);
+            });
+
+            var DracJaminf = "<p>Jamaica Lane, 6 boxes</p><p>Ch. 20</p>"
+            var DracJaminfwin = new google.maps.InfoWindow({
+                content: DracJaminf
+            });
+            var DracJam = new google.maps.Marker({
+                position: {lat: 51.49810, lng: -0.06482},
+                map: map,
+                icon: Dracicon
+            });
+            DracJam.addListener('click', function() {
+                DracJaminfwin.open(map, DracJam);
+            });
+
+            var DracHampinf = "<p>Hampstead Heath, site of vampirized Lucy's attacks on children</p><p>Ch. 13</p>"
+            var DracHampinfwin = new google.maps.InfoWindow({
+                content: DracHampinf
+            });
+            var DracHamp = new google.maps.Marker({
+                position: {lat: 51.56084, lng: -0.16314},
+                map: map,
+                icon: Dracicon
+            });
+            DracHamp.addListener('click', function() {
+                DracHampinfwin.open(map, DracHamp);
+            });
+
+            var DracKingsinf = "<p>Kingstead Churchyard, where Lucy is buried</p><p>Ch. 15</p>"
+            var DracKingsinfwin = new google.maps.InfoWindow({
+                content: DracKingsinf
+            });
+            var DracKings = new google.maps.Marker({
+                position: {lat: 51.55342, lng: -0.16116},
+                map: map,
+                icon: Dracicon
+            });
+            DracKings.addListener('click', function() {
+                DracKingsinfwin.open(map, DracKings);
+            });
+
+            var DracGiulianoinf = "<p>Giuliano's first sighting of Dracula in London</p><p>Ch. 13</p>"
+            var DracGiulianoinfwin = new google.maps.InfoWindow({
+                content: DracGiulianoinf
+            });
+            var DracGiuliano = new google.maps.Marker({
+                position: {lat: 51.50498, lng: -0.14618},
+                map: map,
+                icon: Dracicon
+            });
+            DracGiuliano.addListener('click', function() {
+                DracGiulianoinfwin.open(map, DracGiuliano);
+            });
+
+            var DracHouseinf = "Dracula's Piccadilly house"
+            var DracHouseinfwin = new google.maps.InfoWindow({
+                content: DracHouseinf
+            });
+            var DracHouse = new google.maps.Marker({
+                position: {lat: 51.50392, lng:-0.14863},
+                map: map,
+                icon: Dracicon
+            });
+            DracHouse.addListener('click', function() {
+                DracHouseinfwin.open(map, DracHouse);
+            });
+//    End Dracula
+
+            BMes.setMap(map);
+
+            BHsmith.setMap(map);
+
+            JHReg.setMap(map);
+            JHSoho.setMap(map);
+
+            google.maps.event.addDomListener(
+                    document.getElementsByClassName('dracula')[0],
+                    'click',
+                    function(){
+                        if(DracAsylum.visible) {
+                            DracAsylum.setVisible(false);
+                            DracChick.setVisible(false);
+                            DracGiuliano.setVisible(false);
+                            DracHamp.setVisible(false);
+                            DracHouse.setVisible(false);
+                            DracJam.setVisible(false);
+                            DracKings.setVisible(false);
+                        } else {
+                            DracAsylum.setVisible(true);
+                            DracChick.setVisible(true);
+                            DracGiuliano.setVisible(true);
+                            DracHamp.setVisible(true);
+                            DracHouse.setVisible(true);
+                            DracJam.setVisible(true);
+                            DracKings.setVisible(true);
+                        }
+                    });
+
+
+
+            google.maps.event.addDomListener(
+                    document.getElementsByClassName('all')[0],
+                    'click',
+                    function() {
+                        ripMitre.setVisible(true);
+                        ripBerner.setVisible(true);
+                        ripBrick.setVisible(true);
+                        ripBrune.setVisible(true);
+                        ripBucks.setVisible(true);
+                        ripGunthorpe.setVisible(true);
+                        ripHanbury.setVisible(true);
+                        ripRoyalHospital.setVisible(true);
+
+                        //                Jekyll and Hyde
+
+                        JHSoho.setVisible(true);
+                        JHCav.setVisible(true);
+                        JHCoutts.setVisible(true);
+                        JHReg.setVisible(true);
+
+                        //                The Beetle
+
+                        BMes.setVisible(true);
+                        BWalhamgreen.setVisible(true);
+                        BHsmith.setVisible(true);
+
+
+                        //                Dracula
+                        DracAsylum.setVisible(true);
+                        DracChick.setVisible(true);
+                        DracGiuliano.setVisible(true);
+                        DracHamp.setVisible(true);
+                        DracHouse.setVisible(true);
+                        DracJam.setVisible(true);
+                        DracKings.setVisible(true);
+
+                    });
+
+                    google.maps.event.addDomListener(
+                                        document.getElementsByClassName('jandh')[0],
+                                        'click',
+                                        function(){
+                                            if(JHSoho.visible) {
+                                                JHSoho.setVisible(false);
+                                                JHCav.setVisible(false);
+                                                JHCoutts.setVisible(false);
+                                                JHReg.setVisible(false);
+
+                                            } else {
+                                                JHSoho.setVisible(true);
+                                                JHCav.setVisible(true);
+                                                JHCoutts.setVisible(true);
+                                                JHReg.setVisible(true);
+
+                                            }
+                                        });
+
+
+            google.maps.event.addDomListener(
+                    document.getElementsByClassName('beetle')[0],
+                    'click',
+                    function(){
+                        if(BMes.visible) {
+                            BMes.setVisible(false);
+                            BWalhamgreen.setVisible(false);
+                            BHsmith.setVisible(false);
+                        } else {
+                            BMes.setVisible(true);
+                            BWalhamgreen.setVisible(true);
+                            BHsmith.setVisible(true);
+                        }
+                    });
+
+
+
+
+
+
+
+            google.maps.event.addDomListener(
+                    document.getElementsByClassName('whitechapel')[0],
+                    'click',
+                    function(){
+                        if(ripMitre.visible) {
+                            ripMitre.setVisible(false);
+                            ripBerner.setVisible(false);
+                            ripBrick.setVisible(false);
+                            ripBrune.setVisible(false);
+                            ripBucks.setVisible(false);
+                            ripGunthorpe.setVisible(false);
+                            ripHanbury.setVisible(false);
+                            ripRoyalHospital.setVisible(false);
+                        } else {
+                            ripMitre.setVisible(true);
+                            ripBerner.setVisible(true);
+                            ripBrick.setVisible(true);
+                            ripBrune.setVisible(true);
+                            ripBucks.setVisible(true);
+                            ripGunthorpe.setVisible(true);
+                            ripHanbury.setVisible(true);
+                            ripRoyalHospital.setVisible(true);
+                        }
+                    });
+
+
+
+
+            google.maps.event.addDomListener(
+                    document.getElementsByClassName('none')[0],
+                    'click',
+                    function(){
+                        ripMitre.setVisible(false);
+                        ripBerner.setVisible(false);
+                        ripBrick.setVisible(false);
+                        ripBrune.setVisible(false);
+                        ripBucks.setVisible(false);
+                        ripGunthorpe.setVisible(false);
+                        ripHanbury.setVisible(false);
+                        ripRoyalHospital.setVisible(false);
+
+                        //                Jekyll and Hyde
+
+                        JHSoho.setVisible(false);
+                        JHCav.setVisible(false);
+                        JHCoutts.setVisible(false);
+                        JHReg.setVisible(false);
+
+                        //                The Beetle
+
+                        BMes.setVisible(false);
+                        BWalhamgreen.setVisible(false);
+                        BHsmith.setVisible(false);
+
+
+                        //                Dracula
+                        DracAsylum.setVisible(false);
+                        DracChick.setVisible(false);
+                        DracGiuliano.setVisible(false);
+                        DracHamp.setVisible(false);
+                        DracHouse.setVisible(false);
+                        DracJam.setVisible(false);
+                        DracKings.setVisible(false);
+
+                    });
+
+
+        }
+
+    </script>
+
+</head>
+<body onload="init()">
+    <ul>
+        <li><a href="#" class="all" >All</a></li>
+        <li><a href="#" class="dracula">Dracula</a></li>
+        <li><a href="#" class="jandh">Jekyll and Hyde</a></li>
+        <li><a href="#" class="beetle">The Beetle</a></li>
+        <li><a href="#" class="whitechapel">Whitechapel Murders</a></li>
+        <li><a href="#" class="none">None</a></li>
+
+
+    </ul>
+<div id="footer">Kyle Dase and Brendan Swalm, 2016</a></div>
+
+
+<div id="map">
+</div>
+<img src="booth_map.png" style="position: absolute; top: 90px; left: 20px;" />
+
+<div class="row">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="js/bootstrap.min.js"></script>
+    <style type="text/css">
+        html { overflow: hidden; }
+        body { overflow: hidden; padding: 0; margin: 0;
+            width: 100%; height: 100%; font-family: Trebuchet MS, Trebuchet, Arial, sans-serif; }
+        #map { position: absolute; top: 47px; left: 10px; right: 10px; bottom: 15px; overflow: auto; }
+        #footer { position: absolute; bottom: 0px; left: 0px; width:100%; height: 12px; overflow: hidden; }
+        @media screen and (max-width: 600px) {
+            #map { top:0px; left:0px; width:100%; height:100%;}
+        }
+        body { background: #f4f4f4;}
+        #header { background: #fff; box-shadow: 0 1px 3px #CCC; border: 1px solid #ccc; }
+        #header h1 { padding:7px 10px; margin:0; font-size: 28px; }
+        #map { border: 1px solid #ccc; box-shadow: 0 1px 3px #CCC; background-color: #DEDCD7;}
+        #footer { text-align:center; font-size:9px; color:#606060; }
+    </style>
+    <style>
+        ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #333;
+        }
+
+        li {
+            float: left;
+        }
+
+        li a {
+            display: block;
+            color: white;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+        }
+
+        /* Change the link color to #111 (black) on hover */
+        li a:hover {
+            background-color: #111;
+        }
+    </style>
+</div>
+</body>
+</html>
